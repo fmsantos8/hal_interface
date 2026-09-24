@@ -8,10 +8,12 @@
 extern "C" {
 #endif
 
+// TODO: Make this a opaque structure to hide implementation details from the user.
 typedef struct {
 
 } hal_gpio_t;
 
+// TODO: Create a separate file for the HAL status codes and include it here.
 typedef enum {
     HAL_STATUS_OK = 0,
     HAL_STATUS_ERROR = 1,
