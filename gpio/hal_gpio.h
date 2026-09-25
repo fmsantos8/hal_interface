@@ -1,8 +1,8 @@
 #ifndef __HAL_GPIO__
 #define __HAL_GPIO__
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,22 +21,22 @@ typedef enum {
 
 /**
  * @brief Read the level of a GPIO pin.
- * 
+ *
  * @param gpio[in] Pointer to the GPIO structure.
- * @param level[out] Pointer to a boolean variable where the level will be stored. 
+ * @param level[out] Pointer to a boolean variable where the level will be stored.
  * True for high, false for low.
- * 
+ *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
 hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *level);
 
 /**
  * @brief Write a level to a GPIO pin.
- * 
+ *
  * @param gpio[in] Pointer to the GPIO structure.
- * @param level[in] Pointer to a boolean variable indicating the level to set. 
+ * @param level[in] Pointer to a boolean variable indicating the level to set.
  * True for high, false for low.
- * 
+ *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
 hal_status_t hal_gpio_write(hal_gpio_t *gpio, bool *level);
