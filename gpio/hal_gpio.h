@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "status/hal_status.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,12 +14,6 @@ extern "C" {
 typedef struct {
 
 } hal_gpio_t;
-
-// TODO: Create a separate file for the HAL status codes and include it here.
-typedef enum {
-    HAL_STATUS_OK = 0,
-    HAL_STATUS_ERROR = 1,
-} hal_status_t;
 
 /**
  * @brief Read the level of a GPIO pin.
