@@ -12,8 +12,8 @@ extern "C" {
  *
  */
 typedef enum {
-    HAL_STATUS_OK = 0,
-    HAL_STATUS_ERROR = 1,
+    HAL_STATUS_OK = 0,    /** Operation completed successfully. */
+    HAL_STATUS_ERROR = 1, /** Operation failed due to an error. */
 } hal_status_t;
 
 #ifdef __cplusplus
