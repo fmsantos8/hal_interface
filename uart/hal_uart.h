@@ -54,7 +54,7 @@ typedef struct {
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
-hal_status_t hal_uart_configure(hal_uart_t *uart, const hal_uart_config_t *config);
+hal_status_t hal_uart_config(hal_uart_t *uart, const hal_uart_config_t *config);
 
 /**
  * @brief Write data to an UART device.
