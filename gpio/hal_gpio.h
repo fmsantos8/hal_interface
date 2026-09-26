@@ -10,10 +10,11 @@
 extern "C" {
 #endif
 
-// TODO: Make this a opaque structure to hide implementation details from the user.
-typedef struct {
-
-} hal_gpio_t;
+/**
+ * @brief Opaque structure representing a GPIO pin.
+ *
+ */
+typedef struct hal_gpio hal_gpio_t;
 
 /**
  * @brief Read the level of a GPIO pin.
