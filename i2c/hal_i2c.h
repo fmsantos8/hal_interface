@@ -33,14 +33,14 @@ typedef struct {
 } hal_i2c_config_t;
 
 /**
- * @brief Initialize an I2C controller instance.
+ * @brief Configure an I2C controller instance.
  *
- * @param[in] i2c Pointer to the I2C controller instance to initialize.
+ * @param[in] i2c Pointer to the I2C controller instance to configure.
  * @param[in] config Pointer to the I2C configuration structure.
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
-hal_status_t hal_i2c_init(hal_i2c_t *i2c, const hal_i2c_config_t *config);
+hal_status_t hal_i2c_config(hal_i2c_t *i2c, const hal_i2c_config_t *config);
 
 /**
  * @brief Write data to an I2C device using the specified address.
