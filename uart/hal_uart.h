@@ -47,14 +47,14 @@ typedef struct {
 } hal_uart_config_t;
 
 /**
- * @brief Initialize an UART controller instance.
+ * @brief Configure an UART controller instance.
  *
- * @param[in] uart Pointer to the UART controller instance to initialize.
+ * @param[in] uart Pointer to the UART controller instance to configure.
  * @param[in] config Pointer to the UART configuration structure.
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
-hal_status_t hal_uart_init(hal_uart_t *uart, const hal_uart_config_t *config);
+hal_status_t hal_uart_configure(hal_uart_t *uart, const hal_uart_config_t *config);
 
 /**
  * @brief Write data to an UART device.
