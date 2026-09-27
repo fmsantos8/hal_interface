@@ -72,12 +72,11 @@ hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *level);
  * @brief Write a level to a GPIO pin.
  *
  * @param gpio[in] Pointer to the GPIO structure.
- * @param level[in] Pointer to a boolean variable indicating the level to set.
- * True for high, false for low.
+ * @param level[in] Electrical level to set: true for high, false for low.
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
-hal_status_t hal_gpio_write(hal_gpio_t *gpio, bool *level);
+hal_status_t hal_gpio_write(hal_gpio_t *gpio, bool level);
 
 #ifdef __cplusplus
 }
