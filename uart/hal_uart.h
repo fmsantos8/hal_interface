@@ -26,13 +26,21 @@ typedef enum {
 } hal_uart_parity_t;
 
 /**
+ * @brief Number of UART stop bits.
+ */
+typedef enum {
+    HAL_UART_STOP_BITS_1 = 1, /** One stop bit */
+    HAL_UART_STOP_BITS_2 = 2, /** Two stop bits */
+} hal_uart_stop_bits_t;
+
+/**
  * @brief UART configuration structure.
  *
  */
 typedef struct {
-    uint32_t baud_rate;       /** UART baud rate */
-    hal_uart_parity_t parity; /** UART parity configuration */
-    uint8_t stop_bits;        /** Number of stop bits (1 or 2) */
+    uint32_t baud_rate;             /** Requested baud rate in bps; zero is invalid */
+    hal_uart_parity_t parity;       /** UART parity configuration */
+    hal_uart_stop_bits_t stop_bits; /** One or two stop bits */
 } hal_uart_config_t;
 
 /**
@@ -41,7 +49,10 @@ typedef struct {
  * @param[in] uart Pointer to the UART controller instance to configure.
  * @param[in] config Pointer to the UART configuration structure.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @return HAL_STATUS_INVALID_PARAM for a null argument, zero baud rate or
+ *         invalid enum value; HAL_STATUS_NOT_SUPPORTED for a valid setting
+ *         unavailable on this UART; HAL_STATUS_OK on success; otherwise
+ *         HAL_STATUS_ERROR on hardware failure.
  */
 hal_status_t hal_uart_config(hal_uart_t *uart, const hal_uart_config_t *config);
 
@@ -49,13 +60,13 @@ hal_status_t hal_uart_config(hal_uart_t *uart, const hal_uart_config_t *config);
  * @brief Write data to an UART device.
  *
  * @param[in] uart Pointer to the UART controller instance.
- * @param[in] data Pointer to the data buffer to be written.
- * @param[in] size The number of bytes to write from the data buffer.
- * @param[in] timeout The maximum time to wait for the operation to complete (milliseconds).
+ * @param[in] data Buffer to transmit; must not be null.
+ * @param[in] size Number of bytes to transmit; zero is invalid.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @return HAL_STATUS_INVALID_PARAM for a null buffer or zero size; otherwise
+ *         a hal_status_t indicating the transmission result.
  */
-hal_status_t hal_uart_write(hal_uart_t *uart, const uint8_t *data, uint32_t size, uint32_t timeout);
+hal_status_t hal_uart_write(hal_uart_t *uart, const uint8_t *data, uint32_t size);
 
 #ifdef __cplusplus
 }
