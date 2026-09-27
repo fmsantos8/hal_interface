@@ -16,16 +16,6 @@ extern "C" {
 typedef struct hal_uart hal_uart_t;
 
 /**
- * @brief UART communication direction.
- *
- */
-typedef enum {
-    HAL_UART_DIRECTION_TX = 0,    /** Transmit only */
-    HAL_UART_DIRECTION_RX = 1,    /** Receive only */
-    HAL_UART_DIRECTION_TX_RX = 2, /** Transmit and receive */
-} hal_uart_direction_t;
-
-/**
  * @brief UART parity configuration.
  *
  */
@@ -40,10 +30,9 @@ typedef enum {
  *
  */
 typedef struct {
-    uint32_t baud_rate;             /** UART baud rate */
-    hal_uart_direction_t direction; /** UART direction (TX, RX, or TX_RX) */
-    hal_uart_parity_t parity;       /** UART parity configuration */
-    uint8_t stop_bits;              /** Number of stop bits (1 or 2) */
+    uint32_t baud_rate;       /** UART baud rate */
+    hal_uart_parity_t parity; /** UART parity configuration */
+    uint8_t stop_bits;        /** Number of stop bits (1 or 2) */
 } hal_uart_config_t;
 
 /**
