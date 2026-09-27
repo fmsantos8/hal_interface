@@ -44,9 +44,10 @@ typedef struct {
 /**
  * @brief Configure a GPIO pin with the specified direction and pull resistor.
  *
- * For an output, the port sets the output latch to a low electrical level
- * before enabling the pin as an output. Unsupported electrical configurations
- * return HAL_STATUS_NOT_SUPPORTED.
+ * Configuring an output always drives it to a low electrical level, including
+ * when reconfiguring an already active output. The port sets the output latch
+ * low before enabling the output. Unsupported electrical configurations return
+ * HAL_STATUS_NOT_SUPPORTED.
  *
  * @param[in] gpio Pointer to the GPIO handle.
  * @param[in] config Pointer to the GPIO configuration.
@@ -60,8 +61,8 @@ hal_status_t hal_gpio_config(hal_gpio_t *gpio, const hal_gpio_config_t *config);
 /**
  * @brief Read the level of a GPIO pin.
  *
- * @param gpio[in] Pointer to the GPIO structure.
- * @param level[out] Pointer to a boolean variable where the level will be stored.
+ * @param[in] gpio Pointer to the GPIO structure.
+ * @param[out] level Pointer to a boolean variable where the level will be stored.
  * True for high, false for low.
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
@@ -71,8 +72,8 @@ hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *level);
 /**
  * @brief Write a level to a GPIO pin.
  *
- * @param gpio[in] Pointer to the GPIO structure.
- * @param level[in] Electrical level to set: true for high, false for low.
+ * @param[in] gpio Pointer to the GPIO structure.
+ * @param[in] level Electrical level to set: true for high, false for low.
  *
  * @return hal_status_t Status code indicating success or failure of the operation.
  */
