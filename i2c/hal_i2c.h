@@ -16,19 +16,10 @@ extern "C" {
 typedef struct hal_i2c hal_i2c_t;
 
 /**
- * @brief I2C mode.
- */
-typedef enum {
-    HAL_I2C_MODE_MASTER = 0, /** I2C Master mode */
-    HAL_I2C_MODE_SLAVE = 1,  /** I2C Slave mode */
-} hal_i2c_mode_t;
-
-/**
  * @brief I2C configuration structure.
  *
  */
 typedef struct {
-    hal_i2c_mode_t mode;  /** I2C mode (master or slave) */
     uint32_t clock_speed; /** I2C clock speed in Hz */
 } hal_i2c_config_t;
 
