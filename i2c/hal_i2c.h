@@ -20,7 +20,7 @@ typedef struct hal_i2c hal_i2c_t;
  *
  */
 typedef struct {
-    uint32_t clock_speed; /** I2C clock speed in Hz */
+    uint32_t clock_speed; /** Requested I2C clock speed in Hz; zero is invalid */
 } hal_i2c_config_t;
 
 /**
@@ -29,35 +29,40 @@ typedef struct {
  * @param[in] i2c Pointer to the I2C controller instance to configure.
  * @param[in] config Pointer to the I2C configuration structure.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @return HAL_STATUS_INVALID_PARAM for a null argument or zero clock speed,
+ *         HAL_STATUS_NOT_SUPPORTED if the requested speed is unavailable, or
+ *         HAL_STATUS_OK on success. Hardware failures return HAL_STATUS_ERROR.
  */
 hal_status_t hal_i2c_config(hal_i2c_t *i2c, const hal_i2c_config_t *config);
 
 /**
  * @brief Write data to an I2C device using the specified address.
  *
- * @param i2c[in] Pointer to the I2C controller instance.
- * @param address[in] The 7-bit I2C address of the target device.
- * @param data[in] Pointer to the data buffer to be written.
- * @param size[in] The number of bytes to write from the data buffer.
- * @param timeout[in] The maximum time to wait for the operation to complete (milliseconds).
+ * @param[in] i2c Pointer to the I2C controller instance.
+ * @param[in] address The 7-bit I2C address of the target device.
+ * @param[in] data Pointer to the data buffer to be written; must not be null.
+ * @param[in] size Number of bytes to write; zero is invalid.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @return HAL_STATUS_INVALID_PARAM for a null buffer or zero size; otherwise
+ *         a hal_status_t indicating the transfer result.
  */
-hal_status_t hal_i2c_write(hal_i2c_t *i2c, uint8_t address, const uint8_t *data, uint32_t size, uint32_t timeout);
+hal_status_t hal_i2c_write(hal_i2c_t *i2c, uint8_t address, const uint8_t *data, uint32_t size);
 
 /**
  * @brief Read data from an I2C device using the specified address.
  *
- * @param i2c[in] Pointer to the I2C controller instance.
- * @param address[in] The 7-bit I2C address of the target device.
- * @param data[out] Pointer to the data buffer to store the read data.
- * @param size[in] The number of bytes to read into the data buffer.
- * @param timeout[in] The maximum time to wait for the operation to complete (milliseconds).
+ * After any error, the buffer may contain partial data and its contents must
+ * not be used.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @param[in] i2c Pointer to the I2C controller instance.
+ * @param[in] address The 7-bit I2C address of the target device.
+ * @param[out] data Buffer for the read data; must not be null.
+ * @param[in] size Number of bytes to read; zero is invalid.
+ *
+ * @return HAL_STATUS_INVALID_PARAM for a null buffer or zero size; otherwise
+ *         a hal_status_t indicating the transfer result.
  */
-hal_status_t hal_i2c_read(hal_i2c_t *i2c, uint8_t address, uint8_t *data, uint32_t size, uint32_t timeout);
+hal_status_t hal_i2c_read(hal_i2c_t *i2c, uint8_t address, uint8_t *data, uint32_t size);
 
 #ifdef __cplusplus
 }
