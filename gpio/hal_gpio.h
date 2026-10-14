@@ -1,9 +1,15 @@
+/**
+ * @file hal_gpio.h
+ * @author Fabricio Santos (fmsantos8@ucs.br)
+ * @brief Portable digital input and push-pull output contract.
+ *
+ */
 #ifndef HAL_GPIO_H
 #define HAL_GPIO_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
+#include "common/hal_pin.h"
 #include "common/hal_status.h"
 
 #ifdef __cplusplus
@@ -11,71 +17,90 @@ extern "C" {
 #endif
 
 /**
- * @brief Opaque structure representing a GPIO pin.
- *
+ * @brief Opaque GPIO object owned by the framework.
  */
 typedef struct hal_gpio hal_gpio_t;
 
 /**
- * @brief GPIO pin direction.
+ * @brief Digital direction selected when constructing a GPIO object.
  */
 typedef enum {
-    HAL_GPIO_DIRECTION_INPUT = 0,  /** Configure the pin as an input */
-    HAL_GPIO_DIRECTION_OUTPUT = 1, /** Configure the pin as an output */
+    HAL_GPIO_INPUT = 0, /** Digital input sampled through hal_gpio_read() */
+    HAL_GPIO_OUTPUT     /** Push-pull digital output controlled through hal_gpio_write() */
 } hal_gpio_direction_t;
 
 /**
- * @brief GPIO internal pull resistor.
+ * @brief Internal resistor selection; external resistors are unaffected.
  */
 typedef enum {
-    HAL_GPIO_PULL_NONE = 0, /** Disable internal pull resistors */
-    HAL_GPIO_PULL_UP = 1,   /** Enable the internal pull-up resistor */
-    HAL_GPIO_PULL_DOWN = 2, /** Enable the internal pull-down resistor */
+    HAL_GPIO_PULL_NONE = 0, /** Disable internal pull-up and pull-down resistors */
+    HAL_GPIO_PULL_UP,       /** Enable an internal pull-up resistor */
+    HAL_GPIO_PULL_DOWN      /** Enable an internal pull-down resistor */
 } hal_gpio_pull_t;
 
 /**
  * @brief GPIO configuration.
+ *
+ * @details GPIO operations always use the physical electrical level.
+ *
  */
 typedef struct {
-    hal_gpio_direction_t direction; /** Input or push-pull output */
-    hal_gpio_pull_t pull;           /** Internal pull resistor */
+    hal_pin_t pin;                  /** Physical bank and pin */
+    hal_gpio_direction_t direction; /** Digital input or push-pull output */
+    hal_gpio_pull_t pull;           /** Requested internal resistor configuration */
+    bool initial_level;             /** Initial output level: false is low, true is high; ignored for inputs */
 } hal_gpio_config_t;
 
 /**
- * @brief Configure a GPIO pin with the specified direction and pull resistor.
+ * @brief Construct a GPIO object and configure its physical pin during startup.
  *
- * Configuring an output always drives it to a low electrical level, including
- * when reconfiguring an already active output. The port sets the output latch
- * low before enabling the output. Unsupported electrical configurations return
- * HAL_STATUS_NOT_SUPPORTED.
+ * @details The port validates all fields and pin capabilities before allocation.
+ * For an output, the requested initial level is established as part of enabling
+ * the output; a global guarantee of glitch-free transitions is not provided.
+ * Construction requires an initialized, unsealed framework memory.
+ * The framework owns object storage; failed construction may consume arena
+ * space without guaranteeing memory or hardware rollback. Shared lifecycle
+ * and ownership rules are documented in docs/contracts.md.
  *
- * @param[in] gpio Pointer to the GPIO handle.
- * @param[in] config Pointer to the GPIO configuration.
+ * @param[out] gpio GPIO object pointer to receive the allocated handle; must not be NULL.
+ * @param[in] config Pointer to the GPIO configuration. must not be NULL
  *
- * @return HAL_STATUS_OK on success, HAL_STATUS_INVALID_PARAM for a null
- *         argument or invalid enum value, HAL_STATUS_NOT_SUPPORTED for an
- *         unsupported configuration, or HAL_STATUS_ERROR on hardware failure.
+ * @retval HAL_STATUS_OK The object and pin are ready for the configured direction.
+ * @retval HAL_STATUS_INVALID_ARGUMENT A pointer, pin identifier, or enum value is invalid.
+ * @retval HAL_STATUS_NOT_SUPPORTED The selected pin cannot provide the requested configuration.
+ * @retval HAL_STATUS_NOT_INITIALIZED Platform or arena initialization is missing.
+ * @retval HAL_STATUS_INVALID_STATE The construction phase has ended.
+ * @retval HAL_STATUS_RESOURCE_BUSY The physical pin is already assigned.
+ * @retval HAL_STATUS_NO_MEMORY Object storage is unavailable.
+ * @retval HAL_STATUS_ERROR The platform failed to configure the pin.
  */
-hal_status_t hal_gpio_config(hal_gpio_t *gpio, const hal_gpio_config_t *config);
+hal_status_t hal_gpio_config(hal_gpio_t **gpio, const hal_gpio_config_t *config);
 
 /**
- * @brief Read the level of a GPIO pin.
+ * @brief Synchronously sample the physical level of a digital input.
  *
- * @param[in] gpio Pointer to the GPIO structure.
- * @param[out] level Pointer to a boolean variable where the level will be stored.
- * True for high, false for low.
+ * @param[in] gpio Valid GPIO handle configured as an input.
+ * @param[out] out_level Receives false for low or true for high, only on success.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @retval HAL_STATUS_OK The input level was read.
+ * @retval HAL_STATUS_INVALID_ARGUMENT A required pointer is NULL.
+ * @retval HAL_STATUS_NOT_INITIALIZED The resource is not ready.
+ * @retval HAL_STATUS_NOT_SUPPORTED The handle is configured as an output.
+ * @retval HAL_STATUS_ERROR The platform could not read the pin.
  */
-hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *level);
+hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *out_level);
 
 /**
- * @brief Write a level to a GPIO pin.
+ * @brief Synchronously set the physical level of a push-pull output.
  *
- * @param[in] gpio Pointer to the GPIO structure.
- * @param[in] level Electrical level to set: true for high, false for low.
+ * @param[in] gpio Valid GPIO handle configured as an output.
+ * @param[in] level Requested electrical level: false is low and true is high.
  *
- * @return hal_status_t Status code indicating success or failure of the operation.
+ * @retval HAL_STATUS_OK The output operation was issued successfully.
+ * @retval HAL_STATUS_INVALID_ARGUMENT The handle is NULL.
+ * @retval HAL_STATUS_NOT_INITIALIZED The resource is not ready.
+ * @retval HAL_STATUS_NOT_SUPPORTED The handle is configured as an input.
+ * @retval HAL_STATUS_ERROR The platform could not write the pin.
  */
 hal_status_t hal_gpio_write(hal_gpio_t *gpio, bool level);
 
