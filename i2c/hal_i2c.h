@@ -53,7 +53,7 @@ typedef struct {
 /**
  * @brief Construct a master bus object and configure its controller and pins.
  *
- * @param[out] i2c GPIO object pointer to receive the allocated handle; must not be NULL.
+ * @param[out] i2c I2C object pointer to receive the allocated handle; must not be NULL.
  * @param[in] config Pointer to the GPIO configuration. must not be NULL
  *
  * @retval HAL_STATUS_OK The bus is ready; this does not probe any attached device.
@@ -70,7 +70,7 @@ hal_status_t hal_i2c_config(hal_i2c_t **i2c, const hal_i2c_config_t *config);
 /**
  * @brief Write a nonempty block in one synchronous transaction ending with STOP.
  *
- * @param[in] i2c Valid master bus handle.
+ * @param[in] i2c I2C object pointer.
  * @param[in] address Unshifted seven-bit address from 0x08 through 0x77; reserved addresses are excluded.
  * @param[in] buffer Source data; must not be NULL.
  * @param[in] size Number of source bytes
@@ -87,7 +87,7 @@ hal_status_t hal_i2c_write(hal_i2c_t *i2c, uint8_t address, const uint8_t *buffe
 /**
  * @brief Read a nonempty block in one synchronous transaction ending with STOP.
  *
- * @param[in] i2c Valid master bus handle.
+ * @param[in] i2c I2C object pointer
  * @param[in] address Unshifted seven-bit address from 0x08 through 0x77.
  * @param[out] buffer Destination for size bytes; may contain partial data on failure.
  * @param[in] size Number of bytes to receive; must be positive.
