@@ -65,7 +65,7 @@ typedef struct {
  * @retval HAL_STATUS_NO_MEMORY Framework or SDK storage is unavailable.
  * @retval HAL_STATUS_ERROR The platform failed to configure the timer.
  */
-hal_status_t hal_timer_config(hal_timer_t **out_timer, const hal_timer_config_t *config);
+hal_status_t hal_timer_config(hal_timer_t **timer, const hal_timer_config_t *config);
 
 /**
  * @brief Start a configured periodic timer once, after application initialization.
