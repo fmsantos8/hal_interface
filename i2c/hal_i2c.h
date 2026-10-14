@@ -1,5 +1,17 @@
+/**
+ * @file hal_i2c.h
+ * @author Fabricio Santos (fmsantos8@ucs.br)
+ * @brief Synchronous, addressed I2C master bus contract.
+ *
+ */
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+#include "common/hal_pin.h"
+#include "common/hal_status.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,51 +30,76 @@ typedef struct hal_i2c hal_i2c_t;
 /**
  * @brief I2C configuration structure.
  *
+ * @details Both lines require suitable external pull-up resistors supplied by
+ * the board. The port configures open-drain/peripheral routing through its SDK;
+ * separate GPIO objects must not claim these pins. Build-time pin routing may
+ * constrain the configurations accepted by a port.
+ *
+ * The constructor validates a positive finite transfer timeout, in milliseconds,
+ * before allocation or hardware configuration. Supported values and resolution
+ * depend on the port. A port with a build-time fixed limit accepts only a matching
+ * setting; otherwise construction returns HAL_STATUS_NOT_SUPPORTED. No value is
+ * reserved for an infinite wait. The setting bounds the driver's transfer-wait
+ * mechanism, without guaranteeing a strict whole-call deadline.
  */
 typedef struct {
-    uint32_t clock_speed; /** Requested I2C clock speed in Hz; zero is invalid */
+    uint8_t instance;    /** Zero-based controller identifier mapped by the BSP */
+    hal_pin_t clock_pin; /** Serial clock pin */
+    hal_pin_t data_pin;  /** Serial data pin; must differ from clock_pin */
+    uint32_t frequency;  /** Requested bus clock frequency in hertz; must be positive */
+    uint32_t timeout;    /** Positive driver transfer timeout in milliseconds, retained for the object's lifetime; supported values and resolution are documented by the port */
 } hal_i2c_config_t;
 
 /**
- * @brief Configure an I2C controller instance.
+ * @brief Construct a master bus object and configure its controller and pins.
  *
- * @param[in] i2c Pointer to the I2C controller instance to configure.
- * @param[in] config Pointer to the I2C configuration structure.
+ * @param[out] i2c GPIO object pointer to receive the allocated handle; must not be NULL.
+ * @param[in] config Pointer to the GPIO configuration. must not be NULL
  *
- * @return HAL_STATUS_INVALID_PARAM for a null argument or zero clock speed,
- *         HAL_STATUS_NOT_SUPPORTED if the requested speed is unavailable, or
- *         HAL_STATUS_OK on success. Hardware failures return HAL_STATUS_ERROR.
+ * @retval HAL_STATUS_OK The bus is ready; this does not probe any attached device.
+ * @retval HAL_STATUS_INVALID_ARGUMENT A pointer, identifier, frequency, timeout, or pin combination is invalid.
+ * @retval HAL_STATUS_NOT_SUPPORTED The requested frequency, routing, or timeout setting is unavailable.
+ * @retval HAL_STATUS_NOT_INITIALIZED Platform or arena initialization is missing.
+ * @retval HAL_STATUS_INVALID_STATE The construction phase has ended.
+ * @retval HAL_STATUS_RESOURCE_BUSY The controller or either pin is already assigned.
+ * @retval HAL_STATUS_NO_MEMORY Object storage is unavailable.
+ * @retval HAL_STATUS_ERROR The platform failed to configure the bus.
  */
-hal_status_t hal_i2c_config(hal_i2c_t *i2c, const hal_i2c_config_t *config);
+hal_status_t hal_i2c_config(hal_i2c_t **i2c, const hal_i2c_config_t *config);
 
 /**
- * @brief Write data to an I2C device using the specified address.
+ * @brief Write a nonempty block in one synchronous transaction ending with STOP.
  *
- * @param[in] i2c Pointer to the I2C controller instance.
- * @param[in] address The 7-bit I2C address of the target device.
- * @param[in] data Pointer to the data buffer to be written; must not be null.
- * @param[in] size Number of bytes to write; zero is invalid.
+ * @param[in] i2c Valid master bus handle.
+ * @param[in] address Unshifted seven-bit address from 0x08 through 0x77; reserved addresses are excluded.
+ * @param[in] buffer Source data; must not be NULL.
+ * @param[in] size Number of source bytes
  *
- * @return HAL_STATUS_INVALID_PARAM for a null buffer or zero size; otherwise
- *         a hal_status_t indicating the transfer result.
+ * @retval HAL_STATUS_OK All bytes were accepted by the addressed device.
+ * @retval HAL_STATUS_INVALID_ARGUMENT A pointer, address, or size is invalid.
+ * @retval HAL_STATUS_NOT_INITIALIZED The bus is not ready.
+ * @retval HAL_STATUS_NOT_SUPPORTED The port does not provide this operation or transfer size.
+ * @retval HAL_STATUS_TIMEOUT The configured driver timeout expired; device state may have changed.
+ * @retval HAL_STATUS_ERROR A NACK, arbitration loss, or other bus error occurred.
  */
-hal_status_t hal_i2c_write(hal_i2c_t *i2c, uint8_t address, const uint8_t *data, uint32_t size);
+hal_status_t hal_i2c_write(hal_i2c_t *i2c, uint8_t address, const uint8_t *buffer, uint32_t size);
 
 /**
- * @brief Read data from an I2C device using the specified address.
+ * @brief Read a nonempty block in one synchronous transaction ending with STOP.
  *
- * After any error, the buffer may contain partial data and its contents must
- * not be used.
+ * @param[in] i2c Valid master bus handle.
+ * @param[in] address Unshifted seven-bit address from 0x08 through 0x77.
+ * @param[out] buffer Destination for size bytes; may contain partial data on failure.
+ * @param[in] size Number of bytes to receive; must be positive.
  *
- * @param[in] i2c Pointer to the I2C controller instance.
- * @param[in] address The 7-bit I2C address of the target device.
- * @param[out] data Buffer for the read data; must not be null.
- * @param[in] size Number of bytes to read; zero is invalid.
- *
- * @return HAL_STATUS_INVALID_PARAM for a null buffer or zero size; otherwise
- *         a hal_status_t indicating the transfer result.
+ * @retval HAL_STATUS_OK All requested bytes were received.
+ * @retval HAL_STATUS_INVALID_ARGUMENT A pointer, address, or size is invalid.
+ * @retval HAL_STATUS_NOT_INITIALIZED The bus is not ready.
+ * @retval HAL_STATUS_NOT_SUPPORTED The port does not provide this operation or transfer size.
+ * @retval HAL_STATUS_TIMEOUT The configured driver timeout expired; discard the destination contents.
+ * @retval HAL_STATUS_ERROR A NACK, arbitration loss, or other bus error occurred.
  */
-hal_status_t hal_i2c_read(hal_i2c_t *i2c, uint8_t address, uint8_t *data, uint32_t size);
+hal_status_t hal_i2c_read(hal_i2c_t *i2c, uint8_t address, uint8_t *buffer, uint32_t size);
 
 #ifdef __cplusplus
 }
