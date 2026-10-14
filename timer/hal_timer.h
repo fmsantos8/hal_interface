@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "status/hal_status.h"
+#include "common/hal_status.h"
 
 /**
  * @brief Opaque handle to a dedicated hardware timer selected by the BSP.

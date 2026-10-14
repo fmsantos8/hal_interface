@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "status/hal_status.h"
+#include "common/hal_status.h"
 
 #ifdef __cplusplus
 extern "C" {

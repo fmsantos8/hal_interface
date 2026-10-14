@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "status/hal_status.h"
+#include "common/hal_status.h"
 
 /**
  * @brief Opaque structure representing an UART peripheral.
