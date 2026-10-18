@@ -59,8 +59,7 @@ typedef struct {
  * the output; a global guarantee of glitch-free transitions is not provided.
  * Construction requires an initialized, unsealed framework memory.
  * The framework owns object storage; failed construction may consume arena
- * space without guaranteeing memory or hardware rollback. Shared lifecycle
- * and ownership rules are documented in docs/contracts.md.
+ * space without guaranteeing memory or hardware rollback.
  *
  * @param[out] gpio GPIO object pointer to receive the allocated handle; must not be NULL.
  * @param[in] config Pointer to the GPIO configuration. must not be NULL
