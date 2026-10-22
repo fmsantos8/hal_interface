@@ -79,7 +79,7 @@ hal_status_t hal_gpio_config(hal_gpio_t **gpio, const hal_gpio_config_t *config)
  * @brief Synchronously sample the physical level of a digital input.
  *
  * @param[in] gpio Valid GPIO handle configured as an input.
- * @param[out] out_level Receives false for low or true for high, only on success.
+ * @param[out] level Receives false for low or true for high, only on success.
  *
  * @retval HAL_STATUS_OK The input level was read.
  * @retval HAL_STATUS_INVALID_ARGUMENT A required pointer is NULL.
@@ -87,7 +87,7 @@ hal_status_t hal_gpio_config(hal_gpio_t **gpio, const hal_gpio_config_t *config)
  * @retval HAL_STATUS_NOT_SUPPORTED The handle is configured as an output.
  * @retval HAL_STATUS_ERROR The platform could not read the pin.
  */
-hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *out_level);
+hal_status_t hal_gpio_read(hal_gpio_t *gpio, bool *level);
 
 /**
  * @brief Synchronously set the physical level of a push-pull output.
