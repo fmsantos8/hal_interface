@@ -23,20 +23,18 @@ typedef struct hal_timer hal_timer_t;
 /**
  * @brief Handle a serviced hardware timer expiration in interrupt context.
  *
- * @details The callback takes no arguments and must be short and nonblocking.
- * It must not call HAL operations unless they explicitly support interrupt
- * context. Shared application data requires synchronization appropriate to the
- * selected platform; volatile alone does not guarantee atomic access.
+ * @details Keep callbacks short and nonblocking; call only ISR-safe HAL APIs.
+ * Synchronize shared application data for the platform; volatile alone does
+ * not ensure atomic access.
  */
 typedef void (*hal_timer_callback_t)(void);
 
 /**
  * @brief Fixed periodic configuration copied by the constructor.
  *
- * @details The port reserves a dedicated hardware timer for the firmware lifetime.
- * It validates the period before allocation or hardware configuration. Supported
- * periods and nominal timing resolution are documented by the port; unavailable
- * settings return HAL_STATUS_NOT_SUPPORTED without silent substitution.
+ * @details Reserves dedicated hardware for the firmware lifetime. The port
+ * validates the period before allocation or setup and documents supported
+ * periods/resolution. Unavailable settings return NOT_SUPPORTED without substitution.
  */
 typedef struct {
     uint8_t instance;              /** Port-defined hardware timer resource identifier selected by the BSP */
@@ -47,11 +45,9 @@ typedef struct {
 /**
  * @brief Construct and configure a periodic hardware timer without starting it.
  *
- * @details Construction is sequential and requires an initialized, unsealed
- * framework memory arena. Configuration remains fixed for the object's lifetime.
- * The callback is not invoked until hal_timer_start() activates the timer.
- * Failed construction may consume arena space. No destruction or runtime
- * reconfiguration is provided.
+ * @details Construct sequentially with initialized, unsealed framework memory.
+ * Configuration is fixed; callbacks begin only after hal_timer_start(). Failure
+ * may consume arena space. No destruction or runtime reconfiguration.
  *
  * @param[out] timer Timer object pointer to receive the allocated handle; must not be NULL.
  * @param[in] config Complete startup configuration; must not be NULL.
@@ -70,18 +66,13 @@ hal_status_t hal_timer_config(hal_timer_t **timer, const hal_timer_config_t *con
 /**
  * @brief Start a configured periodic timer once, after application initialization.
  *
- * @details Call from normal execution context after construction and dependency
- * initialization. Shared data used by the callback must already be initialized.
- * This operation allocates no framework objects and may follow arena sealing.
- * The first expiration occurs after one configured period measured from hardware
- * activation; the callback may run before this function returns. Subsequent
- * expirations are periodic. Repeated starts do not restart the timer.
- * No callbacks are delivered after a failed start returns.
- *
- * Interrupt latency may delay callback execution. The port documents conditions
- * under which multiple expirations can coalesce; recovery of every missed period
- * is not guaranteed. A callback-maintained tick counter counts delivered
- * notifications and is not an unconditional measurement of physical elapsed time.
+ * @details Call in normal context after initializing dependencies and callback
+ * data. Allocates no framework objects; allowed after arena sealing. First
+ * expiration follows one period from hardware activation; the callback may run
+ * before return. Repeated starts do not restart it; failed starts leave no callbacks.
+ * Interrupt latency may delay callbacks or coalesce expirations under port-defined
+ * conditions. Missed periods need not be recovered; a callback counter measures
+ * delivered notifications, not necessarily physical elapsed time.
  *
  * @param[in] timer Valid handle returned by hal_timer_config().
  *

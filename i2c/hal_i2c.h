@@ -30,24 +30,20 @@ typedef struct hal_i2c hal_i2c_t;
 /**
  * @brief I2C configuration structure.
  *
- * @details Both lines require suitable external pull-up resistors supplied by
- * the board. The port configures open-drain/peripheral routing through its SDK;
- * separate GPIO objects must not claim these pins. Build-time pin routing may
- * constrain the configurations accepted by a port.
- *
- * The constructor validates a positive finite transfer timeout, in milliseconds,
- * before allocation or hardware configuration. Supported values and resolution
- * depend on the port. A port with a build-time fixed limit accepts only a matching
- * setting; otherwise construction returns HAL_STATUS_NOT_SUPPORTED. No value is
- * reserved for an infinite wait. The setting bounds the driver's transfer-wait
- * mechanism, without guaranteeing a strict whole-call deadline.
+ * @details The board supplies external pull-ups. The port configures open-drain
+ * routing; separate GPIO objects must not claim these pins. Build-time routing
+ * may limit accepted configurations.
+ * The constructor validates a positive, finite timeout before allocation or
+ * hardware setup. Port-defined values/resolution apply; a fixed-limit port
+ * accepts only its matching setting, otherwise returning NOT_SUPPORTED.
+ * No infinite wait; the driver timeout is not a strict whole-call deadline.
  */
 typedef struct {
     uint8_t instance;    /** Zero-based controller identifier mapped by the BSP */
     hal_pin_t clock_pin; /** Serial clock pin */
     hal_pin_t data_pin;  /** Serial data pin; must differ from clock_pin */
     uint32_t frequency;  /** Requested bus clock frequency in hertz; must be positive */
-    uint32_t timeout;    /** Positive driver transfer timeout in milliseconds, retained for the object's lifetime; supported values and resolution are documented by the port */
+    uint32_t timeout;    /** Positive lifetime driver timeout in milliseconds; port-defined values/resolution */
 } hal_i2c_config_t;
 
 /**

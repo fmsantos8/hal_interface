@@ -25,12 +25,10 @@ typedef struct {
 /**
  * @brief Initialize the platform infrastructure and open HAL construction.
  *
- * @details Call once during startup, before constructing any HAL resource.
- * The port establishes the required system-clock infrastructure according to
- * the board/SDK build configuration, respecting initialization already performed
- * by the SDK. Required SDK startup must precede this call as documented by the
- * port. Peripheral clocks, pin routing and peripheral configuration are completed
- * by the corresponding resource constructors.
+ * @details Call once at startup, before HAL construction and after any SDK
+ * startup required by the port. Establishes system clocks from the board/SDK
+ * build configuration, respecting prior SDK initialization. Resource constructors
+ * complete peripheral clocks, routing, and configuration.
  *
  * @param[in] config Required system configuration.
  *

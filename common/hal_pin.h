@@ -12,15 +12,10 @@
 /**
  * @brief Physical pin identifier supplied by the board integration.
  *
- * The port field identifies a GPIO bank, not a platform SDK pointer or a logical
- * device such as an LED. Bank identifiers are zero-based: the ESP32 uses bank 0;
- * STM32 banks A, B, and subsequent banks use 0, 1, and subsequent identifiers;
- * nRF52840 banks P0 and P1 use 0 and 1. The number field is the pin index within
- * the bank, not a bit mask, package lead number, or development-board label.
- *
- * The BSP supplies the available bank mappings and permitted pin assignments.
- * Ports validate these mappings and the capabilities of the selected pin.
- * Identical identifiers do not imply identical wiring on different boards.
+ * Bank identifiers are zero-based: ESP32 uses 0; STM32 A/B use 0/1; nRF52840
+ * P0/P1 use 0/1. number is the bank's pin index, not a mask or board/package label.
+ * The BSP defines mappings and wiring; the port validates pin capabilities.
+ * Identical identifiers may have different wiring across boards.
  */
 typedef struct {
     uint8_t port;   /** Zero-based GPIO bank identifier */

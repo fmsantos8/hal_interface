@@ -51,20 +51,14 @@ typedef enum {
 /**
  * @brief UART configuration copied by the constructor.
  *
- * @details The instance identifies the controller independently of the pin pair.
- * Pins must form a valid route for that controller. On platforms using build-time
- * pin control, the requested pins must match a route provisioned by the BSP;
- * arbitrary runtime pin remapping is not guaranteed. Hardware flow control is
- * disabled. receive_pin describes the wiring, although no receive API is exposed.
- * Ports translate payload bit counts independently of the SDK's word-length
- * convention, including when parity is enabled.
- *
- * The constructor validates a positive finite transfer timeout, in milliseconds,
- * before allocation or hardware configuration. Supported values and resolution
- * depend on the port. A port with a build-time fixed limit accepts only a matching
- * setting; otherwise construction returns HAL_STATUS_NOT_SUPPORTED. No value is
- * reserved for an infinite wait. The setting bounds the driver's transfer-wait
- * mechanism, without guaranteeing a strict whole-call deadline.
+ * @details Pins must route to instance, matching BSP build-time routing where
+ * required; arbitrary runtime remapping is not guaranteed. No hardware flow
+ * control or receive API; receive_pin describes wiring. Payload width excludes
+ * parity, regardless of the SDK's word-length convention.
+ * The constructor validates a positive, finite timeout before allocation or
+ * hardware setup. Port-defined values/resolution apply; a fixed-limit port
+ * accepts only its matching setting, otherwise returning NOT_SUPPORTED.
+ * No infinite wait; the driver timeout is not a strict whole-call deadline.
  */
 typedef struct {
     uint8_t instance;                 /** Zero-based controller identifier */
@@ -74,7 +68,7 @@ typedef struct {
     hal_uart_data_width_t data_width; /** Number of payload bits per character */
     hal_uart_parity_t parity;         /** Parity configuration */
     hal_uart_stop_count_t stop_count; /** Number of stop bits per character */
-    uint32_t timeout;                 /** Positive driver transfer timeout in milliseconds, retained for the object's lifetime; supported values and resolution are documented by the port */
+    uint32_t timeout;                 /** Positive lifetime driver timeout in milliseconds; port-defined values/resolution */
 } hal_uart_config_t;
 
 /**
@@ -97,16 +91,12 @@ hal_status_t hal_uart_config(hal_uart_t **uart, const hal_uart_config_t *config)
 /**
  * @brief Write data to an UART device.
  *
- * @details On success, every byte has been submitted and the SDK transfer has
- * completed. This does not confirm reception by the remote device. The count
- * reports bytes accepted for transmission, not acknowledged by a receiver;
- * accepted bytes may still leave the wire after a timeout or error. The caller
- * may reuse the source buffer after return, and the port retains no reference.
- * The configured timeout follows the selected port's bounded driver wait rules;
- * a strict whole-call deadline is not guaranteed by the common contract.
- * There are no automatic retries; retrying the complete block after a partial
- * result can duplicate bytes. Seven-bit mode requires every byte to be <= 0x7F;
- * the entire buffer is validated before any transmission starts.
+ * @details Success means all bytes were submitted and the SDK transfer completed,
+ * without confirming remote reception. The count is the accepted prefix; bytes
+ * may still leave the wire after failure. The source buffer can be reused on
+ * return; the port retains no reference. Uses the configured driver wait limit.
+ * No retries; resending after a partial result may duplicate bytes. Seven-bit
+ * mode validates every byte is <= 0x7F before transmitting.
  *
  * @param[in] uart Valid UART handle.
  * @param[in] buffer Source data; may be NULL only when size is zero.
